@@ -9,7 +9,7 @@
 [general]
 # Target resolution for training images
 # Images will be resized/bucketed to this resolution or similar aspect ratios
-resolution = [1024, 1024]
+resolution = [512, 512]
 
 # Caption file extension
 caption_extension = ".txt"
@@ -35,22 +35,22 @@ bucket_no_upscale = false
 [[datasets]]
 # Directory containing target images (your goal outputs)
 # Example: /home/user/datasets/my_character/target_images
-image_directory = "/absolute/path/to/your_dataset/target_images"
+image_directory = "/root/musubi-tuner/dataset/target_Images"
 
 # Directory containing control images (reference character images)
 # Filenames MUST match the target image filenames (ignoring file extension)
 # Example: /home/user/datasets/my_character/control_images
-control_directory = "/absolute/path/to/your_dataset/control_images"
+control_directory = "/root/musubi-tuner/dataset/control_images"
 
 # Directory where cached latents and text encoder outputs will be stored
 # This will be created automatically if it doesn't exist
 # Example: /home/user/datasets/my_character/cache
-cache_directory = "/absolute/path/to/your_dataset/cache"
+cache_directory = "/root/musubi-tuner/dataset/cache"
 
 # Number of times to repeat this dataset during training
 # Increase this for small datasets to see more epochs
 # Recommended: 1 for >200 images, 2-3 for <50 images
-num_repeats = 1
+num_repeats = 3
 
 
 # ============================================================================
