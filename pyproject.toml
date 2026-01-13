@@ -42,6 +42,9 @@ cu130 = [
 gui = [
     "gradio>=4.0.0, <6.0.0",
 ]
+xformers = [
+    "xformers>=0.0.28",
+]
 
 [tool.uv]
 conflicts = [
@@ -57,7 +60,7 @@ dev = [
   "ascii-magic==2.3.0",
   "matplotlib==3.10.0",
   "tensorboard",
-  "prompt-toolkit==3.0.51",
+  "prompt-toolkit==3.0.47",
   "ruff>=0.12.10",
 ]
 

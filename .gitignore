@@ -11,3 +11,5 @@ main.obj
 .vscode/settings.json
 .mcp.json
 dataset/
+output/
+test_outputs/

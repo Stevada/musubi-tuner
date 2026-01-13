@@ -1,25 +1,22 @@
-# Sample Dataset Configuration for Qwen-Image-Edit Character Consistency LoRA Training
+# FLUX.1 Kontext i2i LoRA Training Dataset Configuration
 #
-# This is a template configuration file. Copy this file and update the paths
-# to point to your actual dataset directories.
+# This configuration file defines the dataset for FLUX image-to-image training.
+# FLUX Kontext takes a control/reference image and generates a new image based on the prompt.
 #
 # IMPORTANT: Use absolute paths, not relative paths!
-# Replace "/absolute/path/to/" with your actual directory paths.
 
 [general]
 # Target resolution for training images
-# Images will be resized/bucketed to this resolution or similar aspect ratios
+# Common resolutions: [1024, 1024], [960, 544], [768, 1344]
 resolution = [512, 512]
 
 # Caption file extension
 caption_extension = ".txt"
 
-# Batch size - keep at 1 for single GPU training with limited VRAM
-# The actual batch size is controlled by bucket batching
+# Batch size - keep at 1 for single GPU training
 batch_size = 1
 
 # Enable bucketing to handle images with different aspect ratios
-# This groups images of similar aspect ratios together
 enable_bucket = true
 
 # Don't upscale images smaller than target resolution
@@ -29,28 +26,32 @@ bucket_no_upscale = false
 # ============================================================================
 # Dataset Definition (Directory-based approach)
 # ============================================================================
-# This approach uses separate directories for target images, control images,
-# and captions in .txt files alongside the target images.
+# This approach uses separate directories for target images and control images,
+# with captions in .txt files alongside the target images.
 
 [[datasets]]
-# Directory containing target images (your goal outputs)
-# Example: /home/user/datasets/my_character/target_images
+# Directory containing target images (your desired outputs)
+# Example: /home/user/datasets/my_flux_dataset/target_images
 image_directory = "/root/musubi-tuner/dataset/target_Images"
 
-# Directory containing control images (reference character images)
+# Directory containing control/reference images (source images for i2i)
 # Filenames MUST match the target image filenames (ignoring file extension)
-# Example: /home/user/datasets/my_character/control_images
+# Example: /home/user/datasets/my_flux_dataset/control_images
 control_directory = "/root/musubi-tuner/dataset/control_images"
 
 # Directory where cached latents and text encoder outputs will be stored
 # This will be created automatically if it doesn't exist
-# Example: /home/user/datasets/my_character/cache
+# Example: /home/user/datasets/my_flux_dataset/cache
 cache_directory = "/root/musubi-tuner/dataset/cache"
 
 # Number of times to repeat this dataset during training
 # Increase this for small datasets to see more epochs
 # Recommended: 1 for >200 images, 2-3 for <50 images
 num_repeats = 3
+
+# Optional: disable control image resizing (default: false)
+# If true, control images won't be resized to match target resolution
+# flux_kontext_no_resize_control = false
 
 
 # ============================================================================
@@ -62,8 +63,8 @@ num_repeats = 3
 # [[datasets]]
 # # Path to JSONL file with metadata
 # # Each line should be a JSON object with:
-# # {"image_path": "/path/to/target.png", "control_path": "/path/to/control.png", "caption": "A person waving"}
-# # Example: /home/user/datasets/my_character/metadata.jsonl
+# # {"image_path": "/path/to/target.png", "control_path": "/path/to/control.png", "caption": "A scene"}
+# # Example: /home/user/datasets/my_flux_dataset/metadata.jsonl
 # image_jsonl_file = "/absolute/path/to/metadata.jsonl"
 #
 # # Cache directory
@@ -71,6 +72,9 @@ num_repeats = 3
 #
 # # Number of repeats
 # num_repeats = 1
+#
+# # Optional: disable control image resizing
+# flux_kontext_no_resize_control = false
 
 
 # ============================================================================
@@ -98,38 +102,41 @@ num_repeats = 3
 #
 # For directory-based approach, your dataset should look like:
 #
-# your_dataset/
+# flux_dataset/
 # ├── target_images/
-# │   ├── char01_wave.png
-# │   ├── char01_wave.txt      # Caption: "A person waving hello"
-# │   ├── char01_sit.png
-# │   ├── char01_sit.txt       # Caption: "A person sitting on a chair"
+# │   ├── image1.png
+# │   ├── image1.txt          # Caption: "A person waving hello"
+# │   ├── image2.png
+# │   ├── image2.txt          # Caption: "A person sitting on a chair"
 # │   └── ...
 # ├── control_images/
-# │   ├── char01_wave.png      # Reference character image (MUST match target filename!)
-# │   ├── char01_sit.png
+# │   ├── image1.png          # Reference image (MUST match target filename!)
+# │   ├── image2.png
 # │   └── ...
-# └── cache/                    # Auto-created during caching
+# └── cache/                  # Auto-created during caching
 #
 # Caption Guidelines:
-# - Describe the ACTION or POSE, not the character appearance
-# - Examples: "A person jumping", "Standing with arms crossed"
-# - The character information comes from the control image
+# - Describe the desired OUTPUT scene, not just the control image
+# - The control image provides the reference/structure
+# - Examples: "A person in a futuristic city", "Character wearing a red dress"
 # - Keep captions concise and descriptive
 #
 # Filename Matching:
 # - Control image filename MUST match target image filename
-# - File extensions can differ (e.g., target.png -> control.jpg is OK)
-# - Example matches: char01_wave.png <-> char01_wave.jpg
+# - File extensions can differ (e.g., target.png <-> control.jpg is OK)
+# - Example matches: image1.png <-> image1.jpg
 #
 # Image Requirements:
 # - Supported formats: PNG, JPG, JPEG, WEBP
 # - Recommended resolution: 1024x1024 or similar (will be bucketed)
-# - Control images should clearly show the character you want to preserve
-# - Target images should show the character in the desired new pose/scene
+# - Control images provide the reference structure for i2i generation
+# - Target images show the desired output for that control image
 #
-# Multiple Control Images (for Qwen-Image-Edit-2509/2511):
-# - You can use multiple control images per target by naming them:
-#   - target: image1.png
-#   - controls: image1_0.png, image1_1.png, image1_2.png
-#   - or: image1_0000.png, image1_0001.png, image1_0002.png
+# Control Image Behavior:
+# - By default, control images are resized to match target resolution
+# - Set flux_kontext_no_resize_control = true to disable resizing
+# - Only ONE control image per target image is supported
+#
+# FLUX vs Qwen-Image-Edit:
+# - FLUX Kontext: 1 control image per target
+# - Qwen-Image-Edit: Multiple control images supported (image1_0.png, image1_1.png)
