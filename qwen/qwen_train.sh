@@ -1,0 +1,31 @@
+accelerate launch --num_cpu_threads_per_process 1 --mixed_precision bf16 \
+    src/musubi_tuner/qwen_image_train_network.py \
+    --dit /workspace/runpod-slim/ComfyUI/models/diffusion_models/qwen_image_edit_2511_fp8_e4m3fn_scaled_lightning_comfyui.safetensors \
+    --vae /workspace/runpod-slim/ComfyUI/models/vae/qwen_image_vae.safetensors \
+    --text_encoder /workspace/runpod-slim/ComfyUI/models/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors \
+    --model_version edit-2511 \
+    --dataset_config /root/musubi-tuner/dataset_config.toml \
+    --output_dir ./output \
+    --output_name qwen_image_edit_demo_bj_lora \
+    --network_module networks.lora_qwen_image \
+    --network_dim 32 \
+    --network_alpha 16 \
+    --learning_rate 1e-4 \
+    --optimizer_type adamw8bit \
+    --max_train_epochs 20 \
+    --save_every_n_epochs 5 \
+    --mixed_precision bf16 \
+    --gradient_checkpointing \
+    --fp8_base \
+    --fp8_scaled \
+    --blocks_to_swap 16 \
+    --xformers \
+    --split_attn \
+    --timestep_sampling shift \
+    --discrete_flow_shift 2.2 \
+    --weighting_scheme none \
+    --max_data_loader_n_workers 2 \
+    --persistent_data_loader_workers \
+    --seed 42 \
+    --logging_dir ./logs \
+    --log_with tensorboard
